@@ -1,0 +1,29 @@
+type: vertical-stack
+cards:
+  - type: entities
+    title: Haier ATW – Ovládání
+    entities:
+      - entity: switch.power
+      - entity: select.mode
+      - entity: switch.eco
+      - entity: switch.fast_dhw
+  - type: entities
+    title: Haier ATW – Setpointy
+    entities:
+      - entity: number.zone1_setpoint
+      - entity: number.zone2_setpoint
+      - entity: number.dhw_setpoint
+      - entity: number.pool_setpoint
+      - entity: number.sterilization_setpoint
+  - type: entities
+    title: Haier ATW – Telemetrie
+    entities:
+      - entity: sensor.t_outdoor
+      - entity: sensor.twi_inlet
+      - entity: sensor.two_outlet
+      - entity: sensor.t_tank_dhw
+      - entity: sensor.high_pressure
+      - entity: sensor.low_pressure
+      - entity: sensor.kompresor_freq
+      - entity: sensor.current_fault_code
+      - entity: sensor.current_fault_subcode

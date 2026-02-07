@@ -1,0 +1,18 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Haier ATW via EW11",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "slave_id": "Slave ID",
+          "scan_interval": "Scan interval (s)"
+        }
+      }
+    },
+    "error": {
+      "required": "Required"
+    }
+  }
+}
