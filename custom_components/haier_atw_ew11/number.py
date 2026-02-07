@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from homeassistant.components.number import NumberEntity
+from homeassistant.const import UnitOfTemperature
 
 from .const import SPECIAL
 from .entity_base import HaierAtwEntity
@@ -19,7 +20,7 @@ class HaierAtwSetpointNumber(HaierAtwEntity, NumberEntity):
         self._attr_native_min_value = float(spec.get("min", 0))
         self._attr_native_max_value = float(spec.get("max", 80))
         self._attr_native_step = float(spec.get("step", 1.0))
-        self._attr_native_unit_of_measurement = "°C"
+        self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
 
     @property
     def native_value(self) -> float | None:
@@ -33,12 +34,15 @@ class HaierAtwSetpointNumber(HaierAtwEntity, NumberEntity):
         await self.coordinator.client.write_register(self._reg - 40001, raw)
         await self.coordinator.async_request_refresh()
 
+
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data["haier_atw_ew11"][entry.entry_id]
-    async_add_entities([
-        HaierAtwSetpointNumber(coordinator, "zone1_sp", "ZONE1 setpoint"),
-        HaierAtwSetpointNumber(coordinator, "zone2_sp", "ZONE2 setpoint"),
-        HaierAtwSetpointNumber(coordinator, "dhw_sp", "DHW setpoint"),
-        HaierAtwSetpointNumber(coordinator, "pool_sp", "Pool setpoint"),
-        HaierAtwSetpointNumber(coordinator, "steril_sp", "Sterilization setpoint"),
-    ])
+    async_add_entities(
+        [
+            HaierAtwSetpointNumber(coordinator, "zone1_sp", "ZONE1 setpoint"),
+            HaierAtwSetpointNumber(coordinator, "zone2_sp", "ZONE2 setpoint"),
+            HaierAtwSetpointNumber(coordinator, "dhw_sp", "DHW setpoint"),
+            HaierAtwSetpointNumber(coordinator, "pool_sp", "Pool setpoint"),
+            HaierAtwSetpointNumber(coordinator, "steril_sp", "Sterilization setpoint"),
+        ]
+    )

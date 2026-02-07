@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.const import UnitOfTemperature
 
 from .entity_base import HaierAtwEntity
@@ -21,19 +21,23 @@ class HaierAtwRegisterSensor(HaierAtwEntity, SensorEntity):
         self._scale = scale
         self._dtype = dtype
 
-        unit = point.get('unit')
+        unit = point.get("unit")
         if unit:
-            self._attr_native_unit_of_measurement = unit
-            if unit in ('°C','℃'):
+            unit_l = str(unit).lower()
+            if any(token in unit_l for token in ("°c", "℃", "â„ƒ", "Â°c".lower())):
                 self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
                 self._attr_device_class = SensorDeviceClass.TEMPERATURE
-        
-        # unit detection (explicit metadata preferred)
-        if not getattr(self, '_attr_native_unit_of_measurement', None) and ("℃" in desc or "°c" in desc.lower()):
-            self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-            self._attr_device_class = SensorDeviceClass.TEMPERATURE
-        elif not getattr(self, '_attr_native_unit_of_measurement', None) and "hz" in desc.lower():
-            self._attr_native_unit_of_measurement = "Hz"
+            else:
+                self._attr_native_unit_of_measurement = str(unit)
+
+        # Unit detection fallback from description.
+        if not getattr(self, "_attr_native_unit_of_measurement", None):
+            desc_l = desc.lower()
+            if any(token in desc_l for token in ("°c", "℃", "â„ƒ", "Â°c".lower())):
+                self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+                self._attr_device_class = SensorDeviceClass.TEMPERATURE
+            elif "hz" in desc_l:
+                self._attr_native_unit_of_measurement = "Hz"
 
     @property
     def native_value(self):
@@ -49,7 +53,6 @@ class HaierAtwRegisterSensor(HaierAtwEntity, SensorEntity):
                 v = v - 0x10000
             return v * self._scale
         return int(raw) * self._scale
-
 
     @property
     def extra_state_attributes(self):
@@ -68,10 +71,9 @@ class HaierAtwRegisterSensor(HaierAtwEntity, SensorEntity):
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data["haier_atw_ew11"][entry.entry_id]
-    # create sensors for all readable points (R or R/W), excluding verify registers that are better represented by special entities? We'll keep all.
     entities = []
     for p in coordinator.points:
-        rw = (p.get("rw") or "")
+        rw = p.get("rw") or ""
         if "R" not in rw:
             continue
         entities.append(HaierAtwRegisterSensor(coordinator, p))

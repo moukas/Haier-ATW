@@ -12,7 +12,10 @@
       }
     },
     "error": {
-      "required": "Required"
+      "required": "Required",
+      "invalid_port": "Port must be greater than 0",
+      "invalid_slave_id": "Slave ID must be greater than 0",
+      "invalid_scan_interval": "Scan interval must be greater than 0"
     }
   }
 }

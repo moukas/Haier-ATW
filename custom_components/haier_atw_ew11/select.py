@@ -25,6 +25,8 @@ class HaierAtwModeSelect(HaierAtwEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         inv = {v: k for k, v in MODE_OPTIONS.items()}
+        if option not in inv:
+            raise ValueError(f"Invalid option '{option}'. Expected one of: {', '.join(self.options)}")
         value = inv[option]
         await self.coordinator.client.write_register(self._reg - 40001, int(value))
         await self.coordinator.async_request_refresh()

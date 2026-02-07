@@ -3,14 +3,9 @@
   "name": "Haier ATW (EW11 Modbus)",
   "version": "0.1.0",
   "config_flow": true,
-  "documentation": "https://github.com/yourname/haier_atw_ew11",
-  "issue_tracker": "https://github.com/yourname/haier_atw_ew11/issues",
   "iot_class": "local_polling",
   "requirements": [
     "pymodbus>=3.6.9"
-  ],
-  "codeowners": [
-    "@yourname"
   ],
   "integration_type": "hub"
 }

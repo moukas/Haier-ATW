@@ -24,3 +24,7 @@ Hotová karta je v `examples/lovelace_card.yaml` – zkopíruj do UI (Raw YAML e
 
 ## Fault code / subcode
 Senzory `Current fault code` (40205) a `Current fault subcode` (40204) mají atributy `raw` a `hex` pro snadné ladění.
+
+## Dev setup (Python 3.12)
+1. Run: `powershell -ExecutionPolicy Bypass -File .\scripts\setup_dev.ps1 -RunTests`
+2. The script creates `.venv312`, installs `requirements-dev.txt`, and runs `pytest`.

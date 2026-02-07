@@ -1,21 +1,22 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 from datetime import timedelta
 from typing import Any
 
-from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
-    DOMAIN,
     CONF_HOST,
     CONF_PORT,
-    CONF_SLAVE_ID,
     CONF_SCAN_INTERVAL,
+    CONF_SLAVE_ID,
+    DOMAIN,
 )
 from .modbus_client import ModbusClient, ModbusConnectionInfo
 
@@ -29,14 +30,17 @@ def _load_points() -> list[dict[str, Any]]:
 def _infer_scale_dtype(desc: str) -> tuple[float, str]:
     """Best-effort heuristic based on vendor text."""
     d = desc.lower()
-    # temperature-like
-    m = re.search(r"unit\s*0\.1", d)
-    if "℃" in desc or "°c" in d or "c" in d and "unit" in d:
-        if m:
+
+    # Temperature-like (docs may use both normal and mojibake forms of Celsius).
+    is_temperature = any(token in d for token in ("°c", "℃", "â„ƒ", "Â°c".lower()))
+    if is_temperature:
+        if re.search(r"unit[:\s]*0\.1", d):
             return 0.1, "int16"
-        m2 = re.search(r"unit\s*1\s*℃", d)
-        if m2:
+        if re.search(r"unit[:\s]*0\.5", d):
+            return 0.5, "int16"
+        if re.search(r"unit[:\s]*1(\D|$)", d):
             return 1.0, "int16"
+
     if "unit 0.01" in d:
         return 0.01, "uint16"
     if "unit 0.1 hz" in d:
@@ -63,7 +67,7 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
         scan = int(entry.data.get(CONF_SCAN_INTERVAL, 10))
         super().__init__(
             hass,
-            logger=__import__("logging").getLogger(__name__),
+            logger=logging.getLogger(__name__),
             name=f"{DOMAIN}_{entry.entry_id}",
             update_interval=timedelta(seconds=scan),
         )
@@ -102,7 +106,7 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
                 start = prev = a
             ranges.append((start, prev))
 
-            for (s, e) in ranges:
+            for s, e in ranges:
                 count = e - s + 1
                 regs = await self.client.read_holding(address=s, count=count)
                 for i, val in enumerate(regs):
@@ -112,7 +116,6 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
         except Exception as err:
             raise UpdateFailed(str(err)) from err
 
-    
     def infer_meta(self, register: int) -> tuple[float, str]:
         """Return (scale, dtype) for a register.
         Prefer explicit metadata from points.json; fall back to heuristic parser.

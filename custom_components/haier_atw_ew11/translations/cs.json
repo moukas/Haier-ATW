@@ -12,7 +12,10 @@
       }
     },
     "error": {
-      "required": "Povinné"
+      "required": "Povinné",
+      "invalid_port": "Port musí být větší než 0",
+      "invalid_slave_id": "Slave ID musí být větší než 0",
+      "invalid_scan_interval": "Interval čtení musí být větší než 0"
     }
   }
 }

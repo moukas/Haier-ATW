@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from inspect import isawaitable
 
 from pymodbus.client import AsyncModbusTcpClient
 
@@ -26,12 +27,19 @@ class ModbusClient:
             if self._client is not None:
                 return
             self._client = AsyncModbusTcpClient(self._info.host, port=self._info.port)
-            await self._client.connect()
+            connected = await self._client.connect()
+            if connected is False:
+                self._client = None
+                raise RuntimeError(
+                    f"Unable to connect to Modbus server {self._info.host}:{self._info.port}"
+                )
 
     async def close(self) -> None:
         async with self._lock:
             if self._client is not None:
-                await self._client.close()
+                maybe_awaitable = self._client.close()
+                if isawaitable(maybe_awaitable):
+                    await maybe_awaitable
                 self._client = None
 
     async def read_holding(self, address: int, count: int = 1) -> list[int]:

@@ -1,3 +1,11 @@
 __pycache__/
 *.pyc
 .venv/
+.venv312/
+.venv312_appdata/
+.venv_py2/
+.venv_appdata/
+.tmp/
+.tmp_venv312/
+.tmp_venv/
+.pyc_tmp/
