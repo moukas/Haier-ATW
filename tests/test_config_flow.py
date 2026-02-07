@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+from unittest.mock import AsyncMock
+
+import pytest
+
+from custom_components.haier_atw_ew11.config_flow import HaierAtwConfigFlow
+from custom_components.haier_atw_ew11.const import (
+    CONF_HOST,
+    CONF_PORT,
+    CONF_SCAN_INTERVAL,
+    CONF_SLAVE_ID,
+)
+
+
+@pytest.mark.asyncio
+async def test_config_flow_shows_initial_form() -> None:
+    flow = HaierAtwConfigFlow()
+    result = await flow.async_step_user()
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "user"
+    assert result["errors"] == {}
+
+
+@pytest.mark.asyncio
+async def test_config_flow_validates_user_input() -> None:
+    flow = HaierAtwConfigFlow()
+
+    result = await flow.async_step_user(
+        {
+            CONF_HOST: " ",
+            CONF_PORT: 502,
+            CONF_SLAVE_ID: 1,
+            CONF_SCAN_INTERVAL: 10,
+        }
+    )
+    assert result["type"] == "form"
+    assert result["errors"][CONF_HOST] == "required"
+
+    result = await flow.async_step_user(
+        {
+            CONF_HOST: "127.0.0.1",
+            CONF_PORT: 0,
+            CONF_SLAVE_ID: 1,
+            CONF_SCAN_INTERVAL: 10,
+        }
+    )
+    assert result["errors"][CONF_PORT] == "invalid_port"
+
+    result = await flow.async_step_user(
+        {
+            CONF_HOST: "127.0.0.1",
+            CONF_PORT: 502,
+            CONF_SLAVE_ID: 0,
+            CONF_SCAN_INTERVAL: 10,
+        }
+    )
+    assert result["errors"][CONF_SLAVE_ID] == "invalid_slave_id"
+
+    result = await flow.async_step_user(
+        {
+            CONF_HOST: "127.0.0.1",
+            CONF_PORT: 502,
+            CONF_SLAVE_ID: 1,
+            CONF_SCAN_INTERVAL: 0,
+        }
+    )
+    assert result["errors"][CONF_SCAN_INTERVAL] == "invalid_scan_interval"
+
+
+@pytest.mark.asyncio
+async def test_config_flow_creates_entry_with_trimmed_host(monkeypatch: pytest.MonkeyPatch) -> None:
+    flow = HaierAtwConfigFlow()
+    set_unique_id = AsyncMock()
+    monkeypatch.setattr(flow, "async_set_unique_id", set_unique_id)
+    monkeypatch.setattr(flow, "_abort_if_unique_id_configured", lambda: None)
+
+    result = await flow.async_step_user(
+        {
+            CONF_HOST: " 192.168.1.10 ",
+            CONF_PORT: 502,
+            CONF_SLAVE_ID: 1,
+            CONF_SCAN_INTERVAL: 10,
+        }
+    )
+
+    assert result["type"] == "create_entry"
+    assert result["title"] == "Haier ATW (192.168.1.10)"
+    assert result["data"][CONF_HOST] == "192.168.1.10"
+    set_unique_id.assert_awaited_once_with("192.168.1.10:502:1")
