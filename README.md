@@ -1,5 +1,7 @@
 # Haier ATW (EW11 Modbus)
 
+![Project icon](assets/haier_atw_ew11_icon.svg)
+
 Custom Home Assistant integration (HACS) for Haier ATW heat pumps connected via Elfin EW11.
 
 ## Features
