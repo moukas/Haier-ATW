@@ -3,7 +3,7 @@ from __future__ import annotations
 from homeassistant.components.number import NumberEntity
 from homeassistant.const import UnitOfTemperature
 
-from .const import SPECIAL
+from .const import REGISTER_BASE, SPECIAL
 from .entity_base import HaierAtwEntity
 
 
@@ -31,7 +31,7 @@ class HaierAtwSetpointNumber(HaierAtwEntity, NumberEntity):
 
     async def async_set_native_value(self, value: float) -> None:
         raw = int(round(float(value) * self._scale_write))
-        await self.coordinator.client.write_register(self._reg - 40001, raw)
+        await self.coordinator.client.write_register(self._reg - REGISTER_BASE, raw)
         await self.coordinator.async_request_refresh()
 
 

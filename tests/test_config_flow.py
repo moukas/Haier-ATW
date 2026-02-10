@@ -8,8 +8,12 @@ from custom_components.haier_atw_ew11.config_flow import HaierAtwConfigFlow
 from custom_components.haier_atw_ew11.const import (
     CONF_HOST,
     CONF_PORT,
+    CONF_RETRIES,
     CONF_SCAN_INTERVAL,
     CONF_SLAVE_ID,
+    CONF_THROTTLE_MS,
+    CONF_TIMEOUT,
+    CONF_TRANSPORT,
 )
 
 
@@ -33,6 +37,10 @@ async def test_config_flow_validates_user_input() -> None:
             CONF_PORT: 502,
             CONF_SLAVE_ID: 1,
             CONF_SCAN_INTERVAL: 10,
+            CONF_TIMEOUT: 1.0,
+            CONF_THROTTLE_MS: 0,
+            CONF_RETRIES: 0,
+            CONF_TRANSPORT: "modbus_tcp",
         }
     )
     assert result["type"] == "form"
@@ -44,6 +52,10 @@ async def test_config_flow_validates_user_input() -> None:
             CONF_PORT: 0,
             CONF_SLAVE_ID: 1,
             CONF_SCAN_INTERVAL: 10,
+            CONF_TIMEOUT: 1.0,
+            CONF_THROTTLE_MS: 0,
+            CONF_RETRIES: 0,
+            CONF_TRANSPORT: "modbus_tcp",
         }
     )
     assert result["errors"][CONF_PORT] == "invalid_port"
@@ -54,6 +66,10 @@ async def test_config_flow_validates_user_input() -> None:
             CONF_PORT: 502,
             CONF_SLAVE_ID: 0,
             CONF_SCAN_INTERVAL: 10,
+            CONF_TIMEOUT: 1.0,
+            CONF_THROTTLE_MS: 0,
+            CONF_RETRIES: 0,
+            CONF_TRANSPORT: "modbus_tcp",
         }
     )
     assert result["errors"][CONF_SLAVE_ID] == "invalid_slave_id"
@@ -64,6 +80,10 @@ async def test_config_flow_validates_user_input() -> None:
             CONF_PORT: 502,
             CONF_SLAVE_ID: 1,
             CONF_SCAN_INTERVAL: 0,
+            CONF_TIMEOUT: 1.0,
+            CONF_THROTTLE_MS: 0,
+            CONF_RETRIES: 0,
+            CONF_TRANSPORT: "modbus_tcp",
         }
     )
     assert result["errors"][CONF_SCAN_INTERVAL] == "invalid_scan_interval"
@@ -82,10 +102,18 @@ async def test_config_flow_creates_entry_with_trimmed_host(monkeypatch: pytest.M
             CONF_PORT: 502,
             CONF_SLAVE_ID: 1,
             CONF_SCAN_INTERVAL: 10,
+            CONF_TIMEOUT: 2.5,
+            CONF_THROTTLE_MS: 10,
+            CONF_RETRIES: 2,
+            CONF_TRANSPORT: "ew11_rtu_over_tcp",
         }
     )
 
     assert result["type"] == "create_entry"
     assert result["title"] == "Haier ATW (192.168.1.10)"
     assert result["data"][CONF_HOST] == "192.168.1.10"
-    set_unique_id.assert_awaited_once_with("192.168.1.10:502:1")
+    assert result["data"][CONF_TRANSPORT] == "ew11_rtu_over_tcp"
+    assert result["data"][CONF_TIMEOUT] == 2.5
+    assert result["data"][CONF_THROTTLE_MS] == 10
+    assert result["data"][CONF_RETRIES] == 2
+    set_unique_id.assert_awaited_once_with("192.168.1.10:502:1:ew11_rtu_over_tcp")

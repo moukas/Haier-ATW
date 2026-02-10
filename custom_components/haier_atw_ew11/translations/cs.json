@@ -2,20 +2,28 @@
   "config": {
     "step": {
       "user": {
-        "title": "Připojení Haier ATW přes EW11",
+        "title": "Pripojeni Haier ATW pres EW11",
         "data": {
           "host": "IP / hostname",
+          "transport": "Transport",
           "port": "Port",
           "slave_id": "Slave ID",
-          "scan_interval": "Interval čtení (s)"
+          "scan_interval": "Interval cteni (s)",
+          "timeout": "Timeout dotazu (s)",
+          "throttle_ms": "Pauza mezi dotazy (ms)",
+          "retries": "Pocet opakovani"
         }
       }
     },
     "error": {
-      "required": "Povinné",
-      "invalid_port": "Port musí být větší než 0",
-      "invalid_slave_id": "Slave ID musí být větší než 0",
-      "invalid_scan_interval": "Interval čtení musí být větší než 0"
+      "required": "Povinne",
+      "invalid_transport": "Neplatny transport",
+      "invalid_port": "Port musi byt vetsi nez 0",
+      "invalid_slave_id": "Slave ID musi byt vetsi nez 0",
+      "invalid_scan_interval": "Interval cteni musi byt vetsi nez 0",
+      "invalid_timeout": "Timeout musi byt vetsi nez 0",
+      "invalid_throttle_ms": "Pauza mezi dotazy musi byt 0 nebo vyssi",
+      "invalid_retries": "Pocet opakovani musi byt 0 nebo vyssi"
     }
   }
 }

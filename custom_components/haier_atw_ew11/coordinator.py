@@ -14,9 +14,18 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .const import (
     CONF_HOST,
     CONF_PORT,
+    CONF_RETRIES,
     CONF_SCAN_INTERVAL,
     CONF_SLAVE_ID,
+    CONF_THROTTLE_MS,
+    CONF_TIMEOUT,
+    CONF_TRANSPORT,
+    DEFAULT_RETRIES,
+    DEFAULT_THROTTLE_MS,
+    DEFAULT_TIMEOUT,
     DOMAIN,
+    REGISTER_BASE,
+    TRANSPORT_MODBUS_TCP,
 )
 from .modbus_client import ModbusClient, ModbusConnectionInfo
 
@@ -60,6 +69,10 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
             host=entry.data[CONF_HOST],
             port=entry.data[CONF_PORT],
             slave_id=entry.data[CONF_SLAVE_ID],
+            transport=entry.data.get(CONF_TRANSPORT, TRANSPORT_MODBUS_TCP),
+            timeout=float(entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)),
+            throttle_ms=int(entry.data.get(CONF_THROTTLE_MS, DEFAULT_THROTTLE_MS)),
+            retries=int(entry.data.get(CONF_RETRIES, DEFAULT_RETRIES)),
         )
         self.client = ModbusClient(info)
         self.points = _load_points()
@@ -84,13 +97,15 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
     def get_raw_by_register(self, register: int) -> int | None:
         if self.data is None:
             return None
-        addr = register - 40001
+        addr = register - REGISTER_BASE
         return self.data.get(addr)
 
     async def _async_update_data(self) -> dict[int, int]:
         try:
             # Read all readable points. Group contiguous addresses for fewer requests.
-            read_addrs = sorted({p["ha_address"] for p in self.points if "R" in (p.get("rw") or "")})
+            read_addrs = sorted(
+                {int(p["register"]) - REGISTER_BASE for p in self.points if "R" in (p.get("rw") or "")}
+            )
             data: dict[int, int] = {}
             if not read_addrs:
                 return data

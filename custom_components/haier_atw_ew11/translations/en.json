@@ -5,17 +5,25 @@
         "title": "Connect to Haier ATW via EW11",
         "data": {
           "host": "Host",
+          "transport": "Transport",
           "port": "Port",
           "slave_id": "Slave ID",
-          "scan_interval": "Scan interval (s)"
+          "scan_interval": "Scan interval (s)",
+          "timeout": "Request timeout (s)",
+          "throttle_ms": "Inter-request delay (ms)",
+          "retries": "Retries"
         }
       }
     },
     "error": {
       "required": "Required",
+      "invalid_transport": "Invalid transport",
       "invalid_port": "Port must be greater than 0",
       "invalid_slave_id": "Slave ID must be greater than 0",
-      "invalid_scan_interval": "Scan interval must be greater than 0"
+      "invalid_scan_interval": "Scan interval must be greater than 0",
+      "invalid_timeout": "Timeout must be greater than 0",
+      "invalid_throttle_ms": "Inter-request delay must be 0 or greater",
+      "invalid_retries": "Retries must be 0 or greater"
     }
   }
 }

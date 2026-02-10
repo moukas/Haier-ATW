@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from homeassistant.components.select import SelectEntity
 
-from .const import SPECIAL, MODE_OPTIONS
+from .const import MODE_OPTIONS, REGISTER_BASE, SPECIAL
 from .entity_base import HaierAtwEntity
 
 
@@ -28,7 +28,7 @@ class HaierAtwModeSelect(HaierAtwEntity, SelectEntity):
         if option not in inv:
             raise ValueError(f"Invalid option '{option}'. Expected one of: {', '.join(self.options)}")
         value = inv[option]
-        await self.coordinator.client.write_register(self._reg - 40001, int(value))
+        await self.coordinator.client.write_register(self._reg - REGISTER_BASE, int(value))
         await self.coordinator.async_request_refresh()
 
 async def async_setup_entry(hass, entry, async_add_entities):
