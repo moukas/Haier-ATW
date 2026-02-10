@@ -21,6 +21,8 @@ from .const import (
     CONF_TIMEOUT,
     CONF_TRANSPORT,
     DEFAULT_RETRIES,
+    TRANSPORT_LEGACY_EW11_RTU_OVER_TCP,
+    TRANSPORT_RTU_OVER_TCP,
     DEFAULT_THROTTLE_MS,
     DEFAULT_TIMEOUT,
     DOMAIN,
@@ -69,7 +71,11 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
             host=entry.data[CONF_HOST],
             port=entry.data[CONF_PORT],
             slave_id=entry.data[CONF_SLAVE_ID],
-            transport=entry.data.get(CONF_TRANSPORT, TRANSPORT_MODBUS_TCP),
+            transport=(
+                TRANSPORT_RTU_OVER_TCP
+                if entry.data.get(CONF_TRANSPORT) == TRANSPORT_LEGACY_EW11_RTU_OVER_TCP
+                else entry.data.get(CONF_TRANSPORT, TRANSPORT_MODBUS_TCP)
+            ),
             timeout=float(entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)),
             throttle_ms=int(entry.data.get(CONF_THROTTLE_MS, DEFAULT_THROTTLE_MS)),
             retries=int(entry.data.get(CONF_RETRIES, DEFAULT_RETRIES)),

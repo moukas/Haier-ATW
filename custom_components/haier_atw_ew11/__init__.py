@@ -20,6 +20,7 @@ from .const import (
     CONF_TRANSPORT,
     DEFAULT_PORT,
     DEFAULT_RETRIES,
+    TRANSPORT_LEGACY_EW11_RTU_OVER_TCP,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SLAVE_ID,
     DEFAULT_THROTTLE_MS,
@@ -36,7 +37,9 @@ PLATFORMS: list[str] = ["sensor", "switch", "number", "select"]
 _YAML_ENTRY_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST): cv.string,
-        vol.Optional(CONF_TRANSPORT, default=TRANSPORT_MODBUS_TCP): vol.In(TRANSPORTS),
+        vol.Optional(CONF_TRANSPORT, default=TRANSPORT_MODBUS_TCP): vol.In(
+            TRANSPORTS + [TRANSPORT_LEGACY_EW11_RTU_OVER_TCP]
+        ),
         vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.positive_int,
         vol.Optional(CONF_SLAVE_ID, default=DEFAULT_SLAVE_ID): cv.positive_int,
         vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.positive_int,

@@ -9,6 +9,7 @@ from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
     DOMAIN,
+    DEFAULT_RTU_OVER_TCP_PORT,
     CONF_HOST,
     CONF_PORT,
     CONF_RETRIES,
@@ -23,25 +24,34 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_THROTTLE_MS,
     DEFAULT_TIMEOUT,
-    TRANSPORT_EW11_RTU_OVER_TCP,
+    TRANSPORT_LEGACY_EW11_RTU_OVER_TCP,
     TRANSPORT_MODBUS_TCP,
+    TRANSPORT_RTU_OVER_TCP,
     TRANSPORTS,
 )
 
 class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
+
+    @staticmethod
+    def _normalize_transport(transport: str) -> str:
+        if transport == TRANSPORT_LEGACY_EW11_RTU_OVER_TCP:
+            return TRANSPORT_RTU_OVER_TCP
+        return transport
     
     async def _validate_and_create_entry(self, user_input: dict[str, Any], source: str = "user") -> FlowResult:
         errors: dict[str, str] = {}
 
         host = str(user_input[CONF_HOST]).strip()
-        transport = str(user_input.get(CONF_TRANSPORT, TRANSPORT_MODBUS_TCP))
+        transport = self._normalize_transport(str(user_input.get(CONF_TRANSPORT, TRANSPORT_MODBUS_TCP)))
         port = int(user_input.get(CONF_PORT, DEFAULT_PORT))
         slave_id = int(user_input.get(CONF_SLAVE_ID, DEFAULT_SLAVE_ID))
         scan_interval = int(user_input.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
         timeout = float(user_input.get(CONF_TIMEOUT, DEFAULT_TIMEOUT))
         throttle_ms = int(user_input.get(CONF_THROTTLE_MS, DEFAULT_THROTTLE_MS))
         retries = int(user_input.get(CONF_RETRIES, DEFAULT_RETRIES))
+        if transport == TRANSPORT_RTU_OVER_TCP and port == DEFAULT_PORT:
+            port = DEFAULT_RTU_OVER_TCP_PORT
 
         if not host:
             errors[CONF_HOST] = "required"
@@ -82,13 +92,17 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def _build_schema(self, defaults: dict[str, Any] | None = None) -> vol.Schema:
         defaults = defaults or {}
+        transport = self._normalize_transport(str(defaults.get(CONF_TRANSPORT, TRANSPORT_MODBUS_TCP)))
+        default_port = defaults.get(CONF_PORT)
+        if default_port is None:
+            default_port = DEFAULT_RTU_OVER_TCP_PORT if transport == TRANSPORT_RTU_OVER_TCP else DEFAULT_PORT
         return vol.Schema(
             {
                 vol.Required(CONF_HOST, default=defaults.get(CONF_HOST, "")): str,
-                vol.Optional(CONF_TRANSPORT, default=defaults.get(CONF_TRANSPORT, TRANSPORT_MODBUS_TCP)): vol.In(
-                    [TRANSPORT_MODBUS_TCP, TRANSPORT_EW11_RTU_OVER_TCP]
+                vol.Optional(CONF_TRANSPORT, default=transport): vol.In(
+                    [TRANSPORT_MODBUS_TCP, TRANSPORT_RTU_OVER_TCP]
                 ),
-                vol.Optional(CONF_PORT, default=defaults.get(CONF_PORT, DEFAULT_PORT)): vol.Coerce(int),
+                vol.Optional(CONF_PORT, default=default_port): vol.Coerce(int),
                 vol.Optional(CONF_SLAVE_ID, default=defaults.get(CONF_SLAVE_ID, DEFAULT_SLAVE_ID)): vol.Coerce(int),
                 vol.Optional(
                     CONF_SCAN_INTERVAL, default=defaults.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)

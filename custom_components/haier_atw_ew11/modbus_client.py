@@ -11,8 +11,9 @@ from .const import (
     DEFAULT_RETRIES,
     DEFAULT_THROTTLE_MS,
     DEFAULT_TIMEOUT,
-    TRANSPORT_EW11_RTU_OVER_TCP,
+    TRANSPORT_LEGACY_EW11_RTU_OVER_TCP,
     TRANSPORT_MODBUS_TCP,
+    TRANSPORT_RTU_OVER_TCP,
 )
 
 
@@ -82,7 +83,7 @@ class ModbusClient:
 
     def __init__(self, info: ModbusConnectionInfo) -> None:
         self._info = info
-        if info.transport == TRANSPORT_EW11_RTU_OVER_TCP:
+        if info.transport in (TRANSPORT_RTU_OVER_TCP, TRANSPORT_LEGACY_EW11_RTU_OVER_TCP):
             self._transport: _BaseTransport = _Ew11RtuOverTcpTransport(info)
         else:
             self._transport = _ModbusTcpTransport(info)

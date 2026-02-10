@@ -3,7 +3,7 @@
 Custom Home Assistant integration (HACS) for Haier ATW heat pumps connected via Elfin EW11.
 
 ## Features
-- Transport selection: `modbus_tcp` or `ew11_rtu_over_tcp`
+- Transport selection: `modbus_tcp` or `rtu_over_tcp`
 - Switches: Power, ECO, Fast DHW
 - Select: Mode
 - Numbers: ZONE1/ZONE2/DHW/Pool/Sterilization setpoints
@@ -16,7 +16,7 @@ Custom Home Assistant integration (HACS) for Haier ATW heat pumps connected via 
 2. Install and restart Home Assistant.
 3. Add integration: Settings -> Devices & Services -> Add Integration -> Haier ATW (EW11 Modbus).
 
-## EW11 transparent tunnel mode (`ew11_rtu_over_tcp`)
+## EW11 transparent tunnel mode (`rtu_over_tcp`)
 Set EW11 to:
 - Network mode: TCP Server
 - Route/Work mode: UART (transparent stream)
@@ -30,7 +30,7 @@ In this mode EW11 is not a Modbus/TCP gateway. The integration sends and parses 
 haier_atw_ew11:
   - host: 192.168.1.50
     port: 8899
-    transport: ew11_rtu_over_tcp
+    transport: rtu_over_tcp
     slave_id: 1
     timeout: 3.0
     throttle_ms: 60

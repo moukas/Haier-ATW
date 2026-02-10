@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 
-from custom_components.haier_atw_ew11.const import TRANSPORT_EW11_RTU_OVER_TCP
+from custom_components.haier_atw_ew11.const import TRANSPORT_RTU_OVER_TCP
 from custom_components.haier_atw_ew11.modbus_client import (
     ModbusClient,
     ModbusConnectionInfo,
@@ -75,7 +75,7 @@ async def test_ew11_rtu_over_tcp_reads_and_writes_against_fake_server() -> None:
             host=host,
             port=port,
             slave_id=1,
-            transport=TRANSPORT_EW11_RTU_OVER_TCP,
+            transport=TRANSPORT_RTU_OVER_TCP,
             timeout=1.0,
             throttle_ms=0,
             retries=0,

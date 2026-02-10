@@ -6,6 +6,7 @@ import pytest
 
 from custom_components.haier_atw_ew11.config_flow import HaierAtwConfigFlow
 from custom_components.haier_atw_ew11.const import (
+    DEFAULT_RTU_OVER_TCP_PORT,
     CONF_HOST,
     CONF_PORT,
     CONF_RETRIES,
@@ -105,15 +106,18 @@ async def test_config_flow_creates_entry_with_trimmed_host(monkeypatch: pytest.M
             CONF_TIMEOUT: 2.5,
             CONF_THROTTLE_MS: 10,
             CONF_RETRIES: 2,
-            CONF_TRANSPORT: "ew11_rtu_over_tcp",
+            CONF_TRANSPORT: "rtu_over_tcp",
         }
     )
 
     assert result["type"] == "create_entry"
     assert result["title"] == "Haier ATW (192.168.1.10)"
     assert result["data"][CONF_HOST] == "192.168.1.10"
-    assert result["data"][CONF_TRANSPORT] == "ew11_rtu_over_tcp"
+    assert result["data"][CONF_TRANSPORT] == "rtu_over_tcp"
+    assert result["data"][CONF_PORT] == DEFAULT_RTU_OVER_TCP_PORT
     assert result["data"][CONF_TIMEOUT] == 2.5
     assert result["data"][CONF_THROTTLE_MS] == 10
     assert result["data"][CONF_RETRIES] == 2
-    set_unique_id.assert_awaited_once_with("192.168.1.10:502:1:ew11_rtu_over_tcp")
+    set_unique_id.assert_awaited_once_with(
+        f"192.168.1.10:{DEFAULT_RTU_OVER_TCP_PORT}:1:rtu_over_tcp"
+    )
