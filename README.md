@@ -51,6 +51,7 @@ Then point integration host/port to this machine and `8899`.
 - Uses strict 0-based addressing internally: `address = register - 40001`.
 - Existing Haier register mapping is kept (e.g., `40001`, `401xx`).
 - Point table extracted from vendor document.
+- Read sensors expose decoded value labels in attributes, including Czech variants (`value_label_cs`, `value_options_cs`) when enum-like values are available.
 
 ## Lovelace (dashboard)
 Ready card is in `examples/lovelace_card.yaml`.
