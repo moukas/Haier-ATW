@@ -38,6 +38,15 @@ haier_atw_ew11:
     scan_interval: 10
 ```
 
+## Mock EW11 server (for local testing)
+Use the included EW11/Haier mock server:
+
+```powershell
+.\.venv312\Scripts\python.exe -B .\scripts\mock_ew11_haier_server.py --host 0.0.0.0 --port 8899 --slave-id 1 --debug
+```
+
+Then point integration host/port to this machine and `8899`.
+
 ## Notes
 - Uses strict 0-based addressing internally: `address = register - 40001`.
 - Existing Haier register mapping is kept (e.g., `40001`, `401xx`).
