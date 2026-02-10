@@ -4,7 +4,9 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
+from homeassistant.components.climate.const import HVACMode
 
+from custom_components.haier_atw_ew11.climate import HaierAtwClimate
 from custom_components.haier_atw_ew11.number import HaierAtwSetpointNumber
 from custom_components.haier_atw_ew11.select import HaierAtwModeSelect
 from custom_components.haier_atw_ew11.switch import HaierAtwSwitch
@@ -20,6 +22,10 @@ class _FakeCoordinator:
 
     def get_raw_by_register(self, register: int) -> int | None:
         return self.data.get(register - 40001)
+
+    def infer_meta(self, register: int) -> tuple[float, str]:  # noqa: ARG002
+        # 40142 in points.json is typically temperature in 0.1 units.
+        return 0.1, "int16"
 
 
 @pytest.mark.asyncio
@@ -60,3 +66,30 @@ async def test_setpoint_number_reads_scaled_value_and_writes_scaled_raw() -> Non
 
     assert coordinator.client.registers[2] == 31  # 40003 address, scale_write=2.0
     coordinator.async_request_refresh.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_climate_entity_reads_and_controls_main_registers() -> None:
+    coordinator = _FakeCoordinator(
+        {
+            100: 1,   # 40101 power status
+            101: 2,   # 40102 mode status -> Heat
+            102: 32,  # 40103 target -> 16.0C
+            141: 330, # 40142 current -> 33.0C
+        }
+    )
+    entity = HaierAtwClimate(coordinator)
+
+    assert entity.hvac_mode == HVACMode.HEAT
+    assert entity.target_temperature == 16.0
+    assert entity.current_temperature == 33.0
+
+    await entity.async_set_temperature(temperature=15.5)
+    assert coordinator.client.registers[2] == 31  # 40003 addr
+
+    await entity.async_set_hvac_mode(HVACMode.COOL)
+    assert coordinator.client.registers[0] == 1   # 40001 power on
+    assert coordinator.client.registers[1] == 1   # 40002 cool mode
+
+    await entity.async_set_hvac_mode(HVACMode.OFF)
+    assert coordinator.client.registers[0] == 0   # 40001 power off

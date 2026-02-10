@@ -9,6 +9,7 @@ Custom Home Assistant integration (HACS) for Haier ATW heat pumps connected via 
 - Switches: Power, ECO, Fast DHW
 - Select: Mode
 - Numbers: ZONE1/ZONE2/DHW/Pool/Sterilization setpoints
+- Climate entity: `ZONE1 Climate` (for Home Assistant Climate dashboard/control panel)
 - Sensors: auto-generated from the included `points.json` point table
 - Request serialization for RS-485 single-master bus (`asyncio.Lock`)
 - Configurable timeout, retries, and throttle between requests

@@ -31,7 +31,7 @@ from .const import (
 )
 from .coordinator import HaierAtwCoordinator
 
-PLATFORMS: list[str] = ["sensor", "switch", "number", "select"]
+PLATFORMS: list[str] = ["sensor", "switch", "number", "select", "climate"]
 
 
 _YAML_ENTRY_SCHEMA = vol.Schema(
