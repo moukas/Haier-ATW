@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import time
 from dataclasses import dataclass
-from inspect import isawaitable
+from inspect import isawaitable, signature
 
 from pymodbus.client import AsyncModbusTcpClient
 
@@ -136,6 +136,16 @@ class _ModbusTcpTransport(_BaseTransport):
     def __init__(self, info: ModbusConnectionInfo) -> None:
         super().__init__(info)
         self._client: AsyncModbusTcpClient | None = None
+        self._unit_kw = self._detect_unit_kw()
+
+    @staticmethod
+    def _detect_unit_kw() -> str:
+        params = signature(AsyncModbusTcpClient.read_holding_registers).parameters
+        if "device_id" in params:
+            return "device_id"
+        if "slave" in params:
+            return "slave"
+        return "unit"
 
     async def connect(self) -> None:
         async with self._connect_lock:
@@ -192,7 +202,7 @@ class _ModbusTcpTransport(_BaseTransport):
                     self._client.read_holding_registers(
                         address=address,
                         count=count,
-                        slave=self._info.slave_id,
+                        **{self._unit_kw: self._info.slave_id},
                     ),
                     timeout=float(self._info.timeout),
                 )
@@ -211,7 +221,7 @@ class _ModbusTcpTransport(_BaseTransport):
                     self._client.write_register(
                         address=address,
                         value=value,
-                        slave=self._info.slave_id,
+                        **{self._unit_kw: self._info.slave_id},
                     ),
                     timeout=float(self._info.timeout),
                 )

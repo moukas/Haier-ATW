@@ -50,11 +50,26 @@ Use the included EW11/Haier mock server:
 
 Then point integration host/port to this machine and `8899`.
 
+## Read-only register scan (real EW11)
+For safe diagnostics (no writes), run:
+
+```powershell
+$env:PYTHONPATH='.'
+.\.venv312\Scripts\python.exe -B .\scripts\read_ew11_registers.py --host 192.168.2.154 --transport rtu_over_tcp --port 8899 --slave-id 1 --timeout 3 --retries 2 --json-out .\tmp\ew11_scan.json
+```
+
+Notes:
+- `--transport modbus_tcp --port 502` for Modbus/TCP gateway mode.
+- Use `--register 40142 --register 40204` or `--range-start 40101 --range-end 40120` for targeted reads.
+- Output JSON can be used to verify scaling/labels against `points.json` before changing entities.
+
 ## Notes
 - Uses strict 0-based addressing internally: `address = register - 40001`.
 - Existing Haier register mapping is kept (e.g., `40001`, `401xx`).
 - Point table extracted from vendor document.
 - Read sensors expose decoded value labels in attributes, including Czech variants (`value_label_cs`, `value_options_cs`) when enum-like values are available.
+- For unstable EW11 links, start with: `transport=rtu_over_tcp`, `port=8899`, `timeout=4-5`, `retries=3`, `throttle_ms=120-200`, `scan_interval=15-30`.
+- Coordinator reads are internally chunked into smaller requests to reduce timeout risk on noisy RS-485/EW11 paths.
 
 ## Lovelace (dashboard)
 Ready card is in `examples/lovelace_card.yaml`.

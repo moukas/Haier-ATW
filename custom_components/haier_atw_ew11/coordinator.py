@@ -31,6 +31,8 @@ from .const import (
 )
 from .modbus_client import ModbusClient, ModbusConnectionInfo
 
+MAX_READ_REGISTERS_PER_REQUEST = 24
+
 
 def _load_points() -> list[dict[str, Any]]:
     here = os.path.dirname(__file__)
@@ -62,6 +64,32 @@ def _infer_scale_dtype(desc: str) -> tuple[float, str]:
         return 0.1, "uint16"
     # default raw
     return 1.0, "uint16"
+
+
+def _build_contiguous_ranges(addresses: list[int]) -> list[tuple[int, int]]:
+    if not addresses:
+        return []
+    ranges: list[tuple[int, int]] = []
+    start = prev = addresses[0]
+    for addr in addresses[1:]:
+        if addr == prev + 1:
+            prev = addr
+            continue
+        ranges.append((start, prev))
+        start = prev = addr
+    ranges.append((start, prev))
+    return ranges
+
+
+def _split_range(start: int, end: int, chunk_size: int) -> list[tuple[int, int]]:
+    chunk = max(int(chunk_size), 1)
+    out: list[tuple[int, int]] = []
+    cursor = start
+    while cursor <= end:
+        chunk_end = min(cursor + chunk - 1, end)
+        out.append((cursor, chunk_end))
+        cursor = chunk_end + 1
+    return out
 
 
 class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
@@ -116,22 +144,17 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
             if not read_addrs:
                 return data
 
-            # Build contiguous ranges
-            ranges = []
-            start = prev = read_addrs[0]
-            for a in read_addrs[1:]:
-                if a == prev + 1:
-                    prev = a
-                    continue
-                ranges.append((start, prev))
-                start = prev = a
-            ranges.append((start, prev))
-
+            # Build contiguous ranges and split them into smaller chunks.
+            # EW11 links are often more stable with shorter read requests.
+            ranges = _build_contiguous_ranges(read_addrs)
             for s, e in ranges:
-                count = e - s + 1
-                regs = await self.client.read_holding(address=s, count=count)
-                for i, val in enumerate(regs):
-                    data[s + i] = int(val)
+                for chunk_start, chunk_end in _split_range(
+                    s, e, chunk_size=MAX_READ_REGISTERS_PER_REQUEST
+                ):
+                    count = chunk_end - chunk_start + 1
+                    regs = await self.client.read_holding(address=chunk_start, count=count)
+                    for i, val in enumerate(regs):
+                        data[chunk_start + i] = int(val)
 
             return data
         except Exception as err:
