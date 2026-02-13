@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from homeassistant.components.switch import SwitchEntity
 
-from .const import REGISTER_BASE, SPECIAL
+from .const import SPECIAL
 from .entity_base import HaierAtwEntity
 
 
@@ -22,11 +22,17 @@ class HaierAtwSwitch(HaierAtwEntity, SwitchEntity):
         return int(raw) == 1
 
     async def async_turn_on(self, **kwargs) -> None:
-        await self.coordinator.client.write_register(self._reg - REGISTER_BASE, 1)
+        await self.coordinator.client.write_register(
+            self.coordinator.register_to_address(self._reg),
+            1,
+        )
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self.coordinator.client.write_register(self._reg - REGISTER_BASE, 0)
+        await self.coordinator.client.write_register(
+            self.coordinator.register_to_address(self._reg),
+            0,
+        )
         await self.coordinator.async_request_refresh()
 
 async def async_setup_entry(hass, entry, async_add_entities):

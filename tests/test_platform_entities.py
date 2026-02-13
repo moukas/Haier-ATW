@@ -27,6 +27,9 @@ class _FakeCoordinator:
         # 40142 in points.json is typically temperature in 0.1 units.
         return 0.1, "int16"
 
+    def register_to_address(self, register: int) -> int:
+        return int(register) - 40001
+
 
 @pytest.mark.asyncio
 async def test_switch_reads_and_writes_registers() -> None:

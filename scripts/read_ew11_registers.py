@@ -16,6 +16,8 @@ from custom_components.haier_atw_ew11.const import (
 )
 from custom_components.haier_atw_ew11.modbus_client import ModbusClient, ModbusConnectionInfo
 
+MODBUS_TCP_ABSOLUTE_ADDRESS_PORT = 8899
+
 
 def _load_points() -> list[dict[str, Any]]:
     points_path = Path(__file__).resolve().parents[1] / "custom_components" / "haier_atw_ew11" / "points.json"
@@ -59,6 +61,10 @@ def _build_ranges(addresses: list[int], max_chunk: int) -> list[tuple[int, int]]
     return ranges
 
 
+def _use_absolute_addressing(transport: str, port: int) -> bool:
+    return str(transport) == TRANSPORT_MODBUS_TCP and int(port) == MODBUS_TCP_ABSOLUTE_ADDRESS_PORT
+
+
 def _safe_print(text: str) -> None:
     print(text.encode("ascii", "backslashreplace").decode("ascii"))
 
@@ -84,7 +90,8 @@ async def _run(args: argparse.Namespace) -> int:
         return 2
 
     selected = sorted(r for r in registers if r >= REGISTER_BASE)
-    addresses = sorted(r - REGISTER_BASE for r in selected)
+    use_absolute_addressing = _use_absolute_addressing(args.transport, int(args.port))
+    addresses = sorted(r if use_absolute_addressing else r - REGISTER_BASE for r in selected)
     ranges = _build_ranges(addresses, max_chunk=max(int(args.max_chunk), 1))
 
     info = ModbusConnectionInfo(
@@ -105,7 +112,8 @@ async def _run(args: argparse.Namespace) -> int:
             count = end_addr - start_addr + 1
             values = await client.read_holding(start_addr, count=count)
             for i, value in enumerate(values):
-                register = REGISTER_BASE + start_addr + i
+                address = start_addr + i
+                register = address if use_absolute_addressing else (REGISTER_BASE + address)
                 raw_by_register[register] = int(value)
     finally:
         await client.close()

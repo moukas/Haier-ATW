@@ -7,7 +7,7 @@ from homeassistant.components.climate.const import (
 )
 from homeassistant.const import UnitOfTemperature
 
-from .const import REGISTER_BASE, SPECIAL
+from .const import SPECIAL
 from .entity_base import HaierAtwEntity
 
 
@@ -90,7 +90,10 @@ class HaierAtwClimate(HaierAtwEntity, ClimateEntity):
         if (temperature := kwargs.get("temperature")) is None:
             return
         raw = int(round(float(temperature) * self._scale_write))
-        await self.coordinator.client.write_register(self._setpoint_reg - REGISTER_BASE, raw)
+        await self.coordinator.client.write_register(
+            self.coordinator.register_to_address(self._setpoint_reg),
+            raw,
+        )
         await self.coordinator.async_request_refresh()
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
@@ -100,18 +103,28 @@ class HaierAtwClimate(HaierAtwEntity, ClimateEntity):
         if hvac_mode not in _HVAC_TO_MODE:
             raise ValueError(f"Unsupported HVAC mode: {hvac_mode}")
 
-        await self.coordinator.client.write_register(self._power_reg - REGISTER_BASE, 1)
         await self.coordinator.client.write_register(
-            self._mode_reg - REGISTER_BASE, _HVAC_TO_MODE[hvac_mode]
+            self.coordinator.register_to_address(self._power_reg),
+            1,
+        )
+        await self.coordinator.client.write_register(
+            self.coordinator.register_to_address(self._mode_reg),
+            _HVAC_TO_MODE[hvac_mode],
         )
         await self.coordinator.async_request_refresh()
 
     async def async_turn_on(self) -> None:
-        await self.coordinator.client.write_register(self._power_reg - REGISTER_BASE, 1)
+        await self.coordinator.client.write_register(
+            self.coordinator.register_to_address(self._power_reg),
+            1,
+        )
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self) -> None:
-        await self.coordinator.client.write_register(self._power_reg - REGISTER_BASE, 0)
+        await self.coordinator.client.write_register(
+            self.coordinator.register_to_address(self._power_reg),
+            0,
+        )
         await self.coordinator.async_request_refresh()
 
 

@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from custom_components.haier_atw_ew11.coordinator import _build_contiguous_ranges, _split_range
+from custom_components.haier_atw_ew11.coordinator import (
+    _build_contiguous_ranges,
+    _split_range,
+    _use_absolute_addressing,
+)
 
 
 def test_build_contiguous_ranges_groups_consecutive_addresses() -> None:
@@ -14,3 +18,9 @@ def test_split_range_respects_chunk_size() -> None:
 
 def test_split_range_handles_invalid_chunk_size() -> None:
     assert _split_range(7, 9, chunk_size=0) == [(7, 7), (8, 8), (9, 9)]
+
+
+def test_use_absolute_addressing_only_for_modbus_tcp_on_8899() -> None:
+    assert _use_absolute_addressing("modbus_tcp", 8899) is True
+    assert _use_absolute_addressing("modbus_tcp", 502) is False
+    assert _use_absolute_addressing("rtu_over_tcp", 8899) is False

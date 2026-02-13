@@ -93,9 +93,7 @@ class HaierAtwRegisterSensor(HaierAtwEntity, SensorEntity):
 
     @property
     def native_value(self):
-        if self.coordinator.data is None:
-            return None
-        raw = self.coordinator.data.get(self._addr)
+        raw = self.coordinator.get_raw_by_register(self._reg)
         if raw is None:
             return None
         # int16 handling if needed

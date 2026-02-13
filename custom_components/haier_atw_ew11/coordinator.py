@@ -32,6 +32,7 @@ from .const import (
 from .modbus_client import ModbusClient, ModbusConnectionInfo
 
 MAX_READ_REGISTERS_PER_REQUEST = 24
+MODBUS_TCP_ABSOLUTE_ADDRESS_PORT = 8899
 
 
 def _load_points() -> list[dict[str, Any]]:
@@ -92,6 +93,11 @@ def _split_range(start: int, end: int, chunk_size: int) -> list[tuple[int, int]]
     return out
 
 
+def _use_absolute_addressing(transport: str, port: int) -> bool:
+    """EW11 Modbus protocol mode on port 8899 typically expects absolute register addresses."""
+    return transport == TRANSPORT_MODBUS_TCP and int(port) == MODBUS_TCP_ABSOLUTE_ADDRESS_PORT
+
+
 class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.entry = entry
@@ -109,6 +115,10 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
             retries=int(entry.data.get(CONF_RETRIES, DEFAULT_RETRIES)),
         )
         self.client = ModbusClient(info)
+        self._use_absolute_addressing = _use_absolute_addressing(
+            transport=info.transport,
+            port=info.port,
+        )
         self.points = _load_points()
 
         scan = int(entry.data.get(CONF_SCAN_INTERVAL, 10))
@@ -131,14 +141,27 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
     def get_raw_by_register(self, register: int) -> int | None:
         if self.data is None:
             return None
-        addr = register - REGISTER_BASE
-        return self.data.get(addr)
+        return self.data.get(register)
+
+    def register_to_address(self, register: int) -> int:
+        if self._use_absolute_addressing:
+            return int(register)
+        return int(register) - REGISTER_BASE
+
+    def address_to_register(self, address: int) -> int:
+        if self._use_absolute_addressing:
+            return int(address)
+        return int(address) + REGISTER_BASE
 
     async def _async_update_data(self) -> dict[int, int]:
         try:
             # Read all readable points. Group contiguous addresses for fewer requests.
             read_addrs = sorted(
-                {int(p["register"]) - REGISTER_BASE for p in self.points if "R" in (p.get("rw") or "")}
+                {
+                    self.register_to_address(int(p["register"]))
+                    for p in self.points
+                    if "R" in (p.get("rw") or "")
+                }
             )
             data: dict[int, int] = {}
             if not read_addrs:
@@ -154,7 +177,8 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
                     count = chunk_end - chunk_start + 1
                     regs = await self.client.read_holding(address=chunk_start, count=count)
                     for i, val in enumerate(regs):
-                        data[chunk_start + i] = int(val)
+                        register = self.address_to_register(chunk_start + i)
+                        data[register] = int(val)
 
             return data
         except Exception as err:
