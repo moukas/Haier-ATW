@@ -50,7 +50,9 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         timeout = float(user_input.get(CONF_TIMEOUT, DEFAULT_TIMEOUT))
         throttle_ms = int(user_input.get(CONF_THROTTLE_MS, DEFAULT_THROTTLE_MS))
         retries = int(user_input.get(CONF_RETRIES, DEFAULT_RETRIES))
-        if transport == TRANSPORT_RTU_OVER_TCP and port == DEFAULT_PORT:
+        # Backward compatibility: auto-fix common default Modbus/TCP port when
+        # user selected RTU-over-TCP transport.
+        if transport == TRANSPORT_RTU_OVER_TCP and port in (502, DEFAULT_PORT):
             port = DEFAULT_RTU_OVER_TCP_PORT
 
         if not host:
