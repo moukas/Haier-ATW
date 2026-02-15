@@ -1,0 +1,165 @@
+type: vertical-stack
+cards:
+  - type: heading
+    heading: Haier ATW – Cockpit
+    icon: mdi:heat-pump
+    heading_style: title
+  - type: grid
+    columns: 4
+    square: false
+    cards:
+      - type: tile
+        entity: switch.haier_atw_power
+        name: Power
+        icon: mdi:power
+      - type: tile
+        entity: switch.haier_atw_eco
+        name: ECO
+        icon: mdi:leaf
+      - type: tile
+        entity: switch.haier_atw_fast_dhw
+        name: Fast DHW
+        icon: mdi:water-boiler
+      - type: tile
+        entity: select.haier_atw_mode
+        name: Mode
+        icon: mdi:cog
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.haier_atw_on_off_state
+        name: Stav
+        icon: mdi:checkbox-marked-circle-outline
+      - type: tile
+        entity: sensor.haier_atw_current_operating_mode
+        name: Režim
+        icon: mdi:run
+      - type: tile
+        entity: sensor.haier_atw_outdoor_unit_defrosting_operation
+        name: Defrost
+        icon: mdi:snowflake-melt
+      - type: tile
+        entity: sensor.haier_atw_outlet_temperature_of_the_hu_two
+        name: Výstup (Two)
+        icon: mdi:thermometer
+      - type: tile
+        entity: sensor.haier_atw_inlet_temperature_of_the_hu_twi
+        name: Vstup (Twi)
+        icon: mdi:thermometer-chevron-down
+      - type: tile
+        entity: sensor.haier_dt_hu_two_twi
+        name: ΔT (Two–Twi)
+        icon: mdi:delta
+      - type: tile
+        entity: sensor.haier_atw_t_buffer_temperature_of_buffer_tank
+        name: Buffer
+        icon: mdi:storage-tank
+      - type: tile
+        entity: sensor.haier_atw_outdoor_unit_ambient_temperature
+        name: Venku
+        icon: mdi:weather-partly-cloudy
+      - type: tile
+        entity: sensor.haier_atw_dhw_tank_t_tank_temperature
+        name: DHW nádrž
+        icon: mdi:water-thermometer
+  - type: heading
+    heading: Výkon a pohon
+    icon: mdi:speedometer
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: gauge
+        entity: sensor.haier_atw_compressor_frequency
+        name: Kompresor (Hz)
+        needle: true
+        min: 0
+        max: 120
+      - type: gauge
+        entity: sensor.haier_atw_speed_of_fan
+        name: Ventilátor
+        needle: true
+        min: 0
+        max: 100
+      - type: gauge
+        entity: sensor.haier_dt_hu_two_twi
+        name: ΔT (°C)
+        needle: true
+        min: 0
+        max: 15
+  - type: heading
+    heading: Diagnostika
+    icon: mdi:stethoscope
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.haier_atw_high_pressure_value
+        name: High P
+        icon: mdi:gauge
+      - type: tile
+        entity: sensor.haier_atw_low_pressure_value
+        name: Low P
+        icon: mdi:gauge-low
+      - type: tile
+        entity: sensor.haier_atw_module_temperature
+        name: Modul
+        icon: mdi:thermometer
+      - type: tile
+        entity: sensor.haier_atw_compressor_suction_temperature
+        name: Sání
+        icon: mdi:arrow-down-bold-circle-outline
+      - type: tile
+        entity: sensor.haier_atw_compressor_discharge_temperature
+        name: Výtlak
+        icon: mdi:arrow-up-bold-circle-outline
+      - type: tile
+        entity: sensor.haier_atw_outdoor_unit_operation_mode
+        name: Outdoor mode
+        icon: mdi:factory
+  - type: heading
+    heading: DHW (teplá voda)
+    icon: mdi:water-boiler
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: tile
+        entity: number.haier_atw_dhw_setpoint
+        name: DHW setpoint
+        icon: mdi:target
+      - type: tile
+        entity: number.haier_atw_sterilization_setpoint
+        name: Sterilizace setpoint
+        icon: mdi:biohazard
+      - type: tile
+        entity: sensor.haier_atw_tank_sterilization_operation_status
+        name: Sterilizace stav
+        icon: mdi:shield-check
+  - type: heading
+    heading: Alarmy
+    icon: mdi:alert
+  - type: entities
+    show_header_toggle: false
+    entities:
+      - entity: sensor.haier_atw_current_fault_code
+        name: Fault code
+      - entity: sensor.haier_atw_current_fault_subcode
+        name: Fault subcode
+  - type: heading
+    heading: Trendy (24h)
+    icon: mdi:chart-line
+  - type: history-graph
+    hours_to_show: 24
+    entities:
+      - entity: sensor.haier_atw_outlet_temperature_of_the_hu_two
+        name: Two
+      - entity: sensor.haier_atw_inlet_temperature_of_the_hu_twi
+        name: Twi
+      - entity: sensor.haier_atw_t_buffer_temperature_of_buffer_tank
+        name: Buffer
+      - entity: sensor.haier_delta_t_hu_two_twi
+        name: ΔT
