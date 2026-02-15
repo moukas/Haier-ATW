@@ -7,6 +7,8 @@ import pytest
 from custom_components.haier_atw_ew11.config_flow import HaierAtwConfigFlow
 from custom_components.haier_atw_ew11.const import (
     DEFAULT_RTU_OVER_TCP_PORT,
+    DEFAULT_NAME,
+    CONF_NAME,
     CONF_HOST,
     CONF_PORT,
     CONF_RETRIES,
@@ -34,6 +36,7 @@ async def test_config_flow_validates_user_input() -> None:
 
     result = await flow.async_step_user(
         {
+            CONF_NAME: "Tepelko",
             CONF_HOST: " ",
             CONF_PORT: 502,
             CONF_SLAVE_ID: 1,
@@ -49,6 +52,7 @@ async def test_config_flow_validates_user_input() -> None:
 
     result = await flow.async_step_user(
         {
+            CONF_NAME: "Tepelko",
             CONF_HOST: "127.0.0.1",
             CONF_PORT: 0,
             CONF_SLAVE_ID: 1,
@@ -63,6 +67,7 @@ async def test_config_flow_validates_user_input() -> None:
 
     result = await flow.async_step_user(
         {
+            CONF_NAME: "Tepelko",
             CONF_HOST: "127.0.0.1",
             CONF_PORT: 502,
             CONF_SLAVE_ID: 0,
@@ -77,6 +82,7 @@ async def test_config_flow_validates_user_input() -> None:
 
     result = await flow.async_step_user(
         {
+            CONF_NAME: "Tepelko",
             CONF_HOST: "127.0.0.1",
             CONF_PORT: 502,
             CONF_SLAVE_ID: 1,
@@ -99,6 +105,7 @@ async def test_config_flow_creates_entry_with_trimmed_host(monkeypatch: pytest.M
 
     result = await flow.async_step_user(
         {
+            CONF_NAME: "  Tepelko Dum  ",
             CONF_HOST: " 192.168.1.10 ",
             CONF_PORT: 502,
             CONF_SLAVE_ID: 1,
@@ -111,7 +118,8 @@ async def test_config_flow_creates_entry_with_trimmed_host(monkeypatch: pytest.M
     )
 
     assert result["type"] == "create_entry"
-    assert result["title"] == "Haier ATW (192.168.1.10)"
+    assert result["title"] == "Tepelko Dum"
+    assert result["data"][CONF_NAME] == "Tepelko Dum"
     assert result["data"][CONF_HOST] == "192.168.1.10"
     assert result["data"][CONF_TRANSPORT] == "rtu_over_tcp"
     assert result["data"][CONF_PORT] == DEFAULT_RTU_OVER_TCP_PORT
@@ -121,3 +129,28 @@ async def test_config_flow_creates_entry_with_trimmed_host(monkeypatch: pytest.M
     set_unique_id.assert_awaited_once_with(
         f"192.168.1.10:{DEFAULT_RTU_OVER_TCP_PORT}:1:rtu_over_tcp"
     )
+
+
+@pytest.mark.asyncio
+async def test_config_flow_import_sets_default_name_when_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    flow = HaierAtwConfigFlow()
+    set_unique_id = AsyncMock()
+    monkeypatch.setattr(flow, "async_set_unique_id", set_unique_id)
+    monkeypatch.setattr(flow, "_abort_if_unique_id_configured", lambda: None)
+
+    result = await flow.async_step_import(
+        {
+            CONF_HOST: "192.168.1.10",
+            CONF_PORT: 8899,
+            CONF_SLAVE_ID: 1,
+            CONF_SCAN_INTERVAL: 10,
+            CONF_TIMEOUT: 2.5,
+            CONF_THROTTLE_MS: 10,
+            CONF_RETRIES: 2,
+            CONF_TRANSPORT: "modbus_tcp",
+        }
+    )
+
+    assert result["type"] == "create_entry"
+    assert result["title"] == DEFAULT_NAME
+    assert result["data"][CONF_NAME] == DEFAULT_NAME

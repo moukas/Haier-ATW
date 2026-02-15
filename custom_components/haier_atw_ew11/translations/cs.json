@@ -4,6 +4,7 @@
       "user": {
         "title": "Pripojeni Haier ATW",
         "data": {
+          "name": "Nazev tepelka",
           "host": "IP / hostname",
           "transport": "Transport",
           "port": "Port",

@@ -4,6 +4,7 @@
       "user": {
         "title": "Connect to Haier ATW via EW11",
         "data": {
+          "name": "Heat pump name",
           "host": "Host",
           "transport": "Transport",
           "port": "Port",

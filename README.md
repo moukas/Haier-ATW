@@ -1,6 +1,6 @@
 # Haier ATW (EW11 Modbus)
 
-![Project icon](assets/haier_atw_ew11_icon.svg)
+![Project icon](Haier.png)
 
 Custom Home Assistant integration (HACS) for Haier ATW heat pumps connected over RS-485 Modbus via EW11/TCP bridges.
 
@@ -45,6 +45,11 @@ Important addressing note:
 2. Install and restart Home Assistant.
 3. Add integration: Settings -> Devices & Services -> Add Integration -> Haier ATW (EW11 Modbus).
 
+## Home Assistant integration icon (Brands)
+- The icon shown next to integration name in Home Assistant UI is loaded from Home Assistant Brands for domain `haier_atw_ew11`.
+- Prepared brand assets are in `brands/custom_integrations/haier_atw_ew11/icon.png` and `brands/custom_integrations/haier_atw_ew11/logo.png`.
+- To make the icon visible in HA UI, submit these files to `home-assistant/brands` under `custom_integrations/haier_atw_ew11/`.
+
 ## EW11 setup: transparent tunnel (`rtu_over_tcp`)
 Set EW11 to:
 - Network mode: TCP Server
@@ -66,7 +71,8 @@ Set EW11 to:
 ## YAML example
 ```yaml
 haier_atw_ew11:
-  - host: 192.168.1.50
+  - name: "Tepelko Dum"
+    host: 192.168.1.50
     port: 8899
     transport: rtu_over_tcp
     slave_id: 1

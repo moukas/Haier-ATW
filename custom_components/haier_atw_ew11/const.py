@@ -1,5 +1,6 @@
 DOMAIN = "haier_atw_ew11"
 
+CONF_NAME = "name"
 CONF_HOST = "host"
 CONF_PORT = "port"
 CONF_SLAVE_ID = "slave_id"
@@ -9,6 +10,7 @@ CONF_TIMEOUT = "timeout"
 CONF_THROTTLE_MS = "throttle_ms"
 CONF_RETRIES = "retries"
 
+DEFAULT_NAME = "Haier ATW"
 DEFAULT_PORT = 8899
 DEFAULT_SLAVE_ID = 1
 DEFAULT_SCAN_INTERVAL = 10

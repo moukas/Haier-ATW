@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 
 from .const import (
+    CONF_NAME,
     CONF_HOST,
     CONF_PORT,
     CONF_RETRIES,
@@ -18,6 +19,7 @@ from .const import (
     CONF_THROTTLE_MS,
     CONF_TIMEOUT,
     CONF_TRANSPORT,
+    DEFAULT_NAME,
     DEFAULT_PORT,
     DEFAULT_RETRIES,
     TRANSPORT_LEGACY_EW11_RTU_OVER_TCP,
@@ -36,6 +38,7 @@ PLATFORMS: list[str] = ["sensor", "switch", "number", "select", "climate"]
 
 _YAML_ENTRY_SCHEMA = vol.Schema(
     {
+        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
         vol.Required(CONF_HOST): cv.string,
         vol.Optional(CONF_TRANSPORT, default=TRANSPORT_MODBUS_TCP): vol.In(
             TRANSPORTS + [TRANSPORT_LEGACY_EW11_RTU_OVER_TCP]

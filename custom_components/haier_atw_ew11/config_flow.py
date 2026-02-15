@@ -10,6 +10,7 @@ from homeassistant.data_entry_flow import FlowResult
 from .const import (
     DOMAIN,
     DEFAULT_RTU_OVER_TCP_PORT,
+    CONF_NAME,
     CONF_HOST,
     CONF_PORT,
     CONF_RETRIES,
@@ -18,6 +19,7 @@ from .const import (
     CONF_THROTTLE_MS,
     CONF_TIMEOUT,
     CONF_TRANSPORT,
+    DEFAULT_NAME,
     DEFAULT_PORT,
     DEFAULT_RETRIES,
     DEFAULT_SLAVE_ID,
@@ -42,6 +44,7 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def _validate_and_create_entry(self, user_input: dict[str, Any], source: str = "user") -> FlowResult:
         errors: dict[str, str] = {}
 
+        name = str(user_input.get(CONF_NAME, "")).strip()
         host = str(user_input[CONF_HOST]).strip()
         transport = self._normalize_transport(str(user_input.get(CONF_TRANSPORT, TRANSPORT_MODBUS_TCP)))
         port = int(user_input.get(CONF_PORT, DEFAULT_PORT))
@@ -55,7 +58,9 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if transport == TRANSPORT_RTU_OVER_TCP and port in (502, DEFAULT_PORT):
             port = DEFAULT_RTU_OVER_TCP_PORT
 
-        if not host:
+        if not name:
+            errors[CONF_NAME] = "required"
+        elif not host:
             errors[CONF_HOST] = "required"
         elif transport not in TRANSPORTS:
             errors[CONF_TRANSPORT] = "invalid_transport"
@@ -79,6 +84,7 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
         normalized = dict(user_input)
+        normalized[CONF_NAME] = name
         normalized[CONF_HOST] = host
         normalized[CONF_TRANSPORT] = transport
         normalized[CONF_PORT] = port
@@ -90,7 +96,7 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         await self.async_set_unique_id(f"{host}:{port}:{slave_id}:{transport}")
         self._abort_if_unique_id_configured()
-        return self.async_create_entry(title=f"Haier ATW ({host})", data=normalized)
+        return self.async_create_entry(title=name, data=normalized)
 
     def _build_schema(self, defaults: dict[str, Any] | None = None) -> vol.Schema:
         defaults = defaults or {}
@@ -101,6 +107,7 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return vol.Schema(
             {
                 vol.Required(CONF_HOST, default=defaults.get(CONF_HOST, "")): str,
+                vol.Required(CONF_NAME, default=defaults.get(CONF_NAME, DEFAULT_NAME)): str,
                 vol.Optional(CONF_TRANSPORT, default=transport): vol.In(
                     [TRANSPORT_MODBUS_TCP, TRANSPORT_RTU_OVER_TCP]
                 ),
@@ -123,4 +130,7 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(step_id="user", data_schema=self._build_schema(), errors={})
 
     async def async_step_import(self, user_input: dict[str, Any]) -> FlowResult:
+        if not user_input.get(CONF_NAME):
+            user_input = dict(user_input)
+            user_input[CONF_NAME] = DEFAULT_NAME
         return await self._validate_and_create_entry(user_input, source="import")
