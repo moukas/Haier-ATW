@@ -6,6 +6,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import selector
 
 from .const import (
     DOMAIN,
@@ -13,6 +14,7 @@ from .const import (
     CONF_NAME,
     CONF_HOST,
     CONF_PORT,
+    CONF_PROFILE,
     CONF_RETRIES,
     CONF_SLAVE_ID,
     CONF_SCAN_INTERVAL,
@@ -30,7 +32,9 @@ from .const import (
     TRANSPORT_MODBUS_TCP,
     TRANSPORT_RTU_OVER_TCP,
     TRANSPORTS,
+    DEFAULT_PROFILE,
 )
+from .profiles import list_profile_options, normalize_profile_id
 
 class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -53,6 +57,7 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         timeout = float(user_input.get(CONF_TIMEOUT, DEFAULT_TIMEOUT))
         throttle_ms = int(user_input.get(CONF_THROTTLE_MS, DEFAULT_THROTTLE_MS))
         retries = int(user_input.get(CONF_RETRIES, DEFAULT_RETRIES))
+        profile = normalize_profile_id(str(user_input.get(CONF_PROFILE, DEFAULT_PROFILE)))
         # Backward compatibility: auto-fix common default Modbus/TCP port when
         # user selected RTU-over-TCP transport.
         if transport == TRANSPORT_RTU_OVER_TCP and port in (502, DEFAULT_PORT):
@@ -76,6 +81,8 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors[CONF_THROTTLE_MS] = "invalid_throttle_ms"
         elif retries < 0:
             errors[CONF_RETRIES] = "invalid_retries"
+        elif profile not in list_profile_options():
+            errors[CONF_PROFILE] = "invalid_profile"
 
         if errors:
             if source == "import":
@@ -93,6 +100,7 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         normalized[CONF_TIMEOUT] = timeout
         normalized[CONF_THROTTLE_MS] = throttle_ms
         normalized[CONF_RETRIES] = retries
+        normalized[CONF_PROFILE] = profile
 
         await self.async_set_unique_id(f"{host}:{port}:{slave_id}:{transport}")
         self._abort_if_unique_id_configured()
@@ -101,6 +109,11 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def _build_schema(self, defaults: dict[str, Any] | None = None) -> vol.Schema:
         defaults = defaults or {}
         transport = self._normalize_transport(str(defaults.get(CONF_TRANSPORT, TRANSPORT_MODBUS_TCP)))
+        profile = normalize_profile_id(str(defaults.get(CONF_PROFILE, DEFAULT_PROFILE)))
+        profile_options = [
+            {"value": profile_id, "label": label}
+            for profile_id, label in list_profile_options().items()
+        ]
         default_port = defaults.get(CONF_PORT)
         if default_port is None:
             default_port = DEFAULT_RTU_OVER_TCP_PORT if transport == TRANSPORT_RTU_OVER_TCP else DEFAULT_PORT
@@ -110,6 +123,12 @@ class HaierAtwConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_NAME, default=defaults.get(CONF_NAME, DEFAULT_NAME)): str,
                 vol.Optional(CONF_TRANSPORT, default=transport): vol.In(
                     [TRANSPORT_MODBUS_TCP, TRANSPORT_RTU_OVER_TCP]
+                ),
+                vol.Optional(CONF_PROFILE, default=profile): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=profile_options,
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    )
                 ),
                 vol.Optional(CONF_PORT, default=default_port): vol.Coerce(int),
                 vol.Optional(CONF_SLAVE_ID, default=defaults.get(CONF_SLAVE_ID, DEFAULT_SLAVE_ID)): vol.Coerce(int),

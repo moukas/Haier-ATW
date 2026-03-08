@@ -10,7 +10,8 @@ from .entity_base import HaierAtwEntity
 class HaierAtwSetpointNumber(HaierAtwEntity, NumberEntity):
     def __init__(self, coordinator, key: str, name: str) -> None:
         super().__init__(coordinator, key)
-        spec = SPECIAL[key]
+        special_map = getattr(coordinator, "special", SPECIAL)
+        spec = special_map[key]
         self._reg = spec["register"]
         self._verify = spec["verify_register"]
         self._scale_write = float(spec.get("scale_write", 1.0))
@@ -40,12 +41,16 @@ class HaierAtwSetpointNumber(HaierAtwEntity, NumberEntity):
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data["haier_atw_ew11"][entry.entry_id]
-    async_add_entities(
-        [
-            HaierAtwSetpointNumber(coordinator, "zone1_sp", "ZONE1 setpoint"),
-            HaierAtwSetpointNumber(coordinator, "zone2_sp", "ZONE2 setpoint"),
-            HaierAtwSetpointNumber(coordinator, "dhw_sp", "DHW setpoint"),
-            HaierAtwSetpointNumber(coordinator, "pool_sp", "Pool setpoint"),
-            HaierAtwSetpointNumber(coordinator, "steril_sp", "Sterilization setpoint"),
-        ]
-    )
+    special_map = getattr(coordinator, "special", SPECIAL)
+    entities = []
+    if "zone1_sp" in special_map:
+        entities.append(HaierAtwSetpointNumber(coordinator, "zone1_sp", "ZONE1 setpoint"))
+    if "zone2_sp" in special_map:
+        entities.append(HaierAtwSetpointNumber(coordinator, "zone2_sp", "ZONE2 setpoint"))
+    if "dhw_sp" in special_map:
+        entities.append(HaierAtwSetpointNumber(coordinator, "dhw_sp", "DHW setpoint"))
+    if "pool_sp" in special_map:
+        entities.append(HaierAtwSetpointNumber(coordinator, "pool_sp", "Pool setpoint"))
+    if "steril_sp" in special_map:
+        entities.append(HaierAtwSetpointNumber(coordinator, "steril_sp", "Sterilization setpoint"))
+    async_add_entities(entities)

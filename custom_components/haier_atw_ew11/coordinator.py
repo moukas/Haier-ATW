@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 import logging
-import os
 import re
 from datetime import timedelta
 from typing import Any
@@ -14,6 +12,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .const import (
     CONF_HOST,
     CONF_PORT,
+    CONF_PROFILE,
     CONF_RETRIES,
     CONF_SCAN_INTERVAL,
     CONF_SLAVE_ID,
@@ -26,19 +25,14 @@ from .const import (
     DEFAULT_THROTTLE_MS,
     DEFAULT_TIMEOUT,
     DOMAIN,
-    REGISTER_BASE,
+    DEFAULT_PROFILE,
     TRANSPORT_MODBUS_TCP,
 )
 from .modbus_client import ModbusClient, ModbusConnectionInfo
+from .profiles import load_profile
 
 MAX_READ_REGISTERS_PER_REQUEST = 24
 MODBUS_TCP_ABSOLUTE_ADDRESS_PORT = 8899
-
-
-def _load_points() -> list[dict[str, Any]]:
-    here = os.path.dirname(__file__)
-    with open(os.path.join(here, "points.json"), "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def _infer_scale_dtype(desc: str) -> tuple[float, str]:
@@ -93,14 +87,31 @@ def _split_range(start: int, end: int, chunk_size: int) -> list[tuple[int, int]]
     return out
 
 
-def _use_absolute_addressing(transport: str, port: int) -> bool:
-    """EW11 Modbus protocol mode on port 8899 typically expects absolute register addresses."""
-    return transport == TRANSPORT_MODBUS_TCP and int(port) == MODBUS_TCP_ABSOLUTE_ADDRESS_PORT
+def _use_absolute_addressing(
+    transport: str,
+    port: int,
+    absolute_addressing_ports: set[int] | None = None,
+) -> bool:
+    """Return whether the active profile/transport expects absolute register addressing."""
+    ports = absolute_addressing_ports
+    if ports is None:
+        ports = {MODBUS_TCP_ABSOLUTE_ADDRESS_PORT}
+    return transport == TRANSPORT_MODBUS_TCP and int(port) in ports
 
 
 class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.entry = entry
+        self.profile = load_profile(entry.data.get(CONF_PROFILE, DEFAULT_PROFILE))
+        self.profile_id = str(self.profile["id"])
+        self.special = dict(self.profile.get("special", {}))
+        self.mode_options = dict(self.profile.get("mode_options", {}))
+        self.mode_to_hvac = dict(self.profile.get("mode_to_hvac", {}))
+        self.hvac_to_mode = dict(self.profile.get("hvac_to_mode", {}))
+        self.current_temperature_register = int(self.profile.get("current_temperature_register", 40142))
+        self._fault_registers = set(self.profile.get("fault_registers", set()))
+        self._register_base = int(self.profile.get("register_base", 40001))
+
         info = ModbusConnectionInfo(
             host=entry.data[CONF_HOST],
             port=entry.data[CONF_PORT],
@@ -118,8 +129,9 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
         self._use_absolute_addressing = _use_absolute_addressing(
             transport=info.transport,
             port=info.port,
+            absolute_addressing_ports=set(self.profile.get("absolute_addressing_ports", set())),
         )
-        self.points = _load_points()
+        self.points = list(self.profile["points"])
 
         scan = int(entry.data.get(CONF_SCAN_INTERVAL, 10))
         super().__init__(
@@ -146,12 +158,18 @@ class HaierAtwCoordinator(DataUpdateCoordinator[dict[int, int]]):
     def register_to_address(self, register: int) -> int:
         if self._use_absolute_addressing:
             return int(register)
-        return int(register) - REGISTER_BASE
+        return int(register) - self._register_base
 
     def address_to_register(self, address: int) -> int:
         if self._use_absolute_addressing:
             return int(address)
-        return int(address) + REGISTER_BASE
+        return int(address) + self._register_base
+
+    def get_special(self, key: str) -> dict[str, Any] | None:
+        return self.special.get(key)
+
+    def is_fault_register(self, register: int) -> bool:
+        return int(register) in self._fault_registers
 
     async def _async_update_data(self) -> dict[int, int]:
         try:

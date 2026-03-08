@@ -6,6 +6,7 @@ CONF_PORT = "port"
 CONF_SLAVE_ID = "slave_id"
 CONF_SCAN_INTERVAL = "scan_interval"
 CONF_TRANSPORT = "transport"
+CONF_PROFILE = "profile"
 CONF_TIMEOUT = "timeout"
 CONF_THROTTLE_MS = "throttle_ms"
 CONF_RETRIES = "retries"
@@ -17,6 +18,7 @@ DEFAULT_SCAN_INTERVAL = 10
 DEFAULT_TIMEOUT = 3.0
 DEFAULT_THROTTLE_MS = 60
 DEFAULT_RETRIES = 2
+DEFAULT_PROFILE = "haier_atw_ew11"
 
 TRANSPORT_MODBUS_TCP = "modbus_tcp"
 TRANSPORT_RTU_OVER_TCP = "rtu_over_tcp"

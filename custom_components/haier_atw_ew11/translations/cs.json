@@ -7,6 +7,7 @@
           "name": "Nazev tepelka",
           "host": "IP / hostname",
           "transport": "Transport",
+          "profile": "Typ tepelka",
           "port": "Port",
           "slave_id": "Slave ID",
           "scan_interval": "Interval cteni (s)",
@@ -24,7 +25,8 @@
       "invalid_scan_interval": "Interval cteni musi byt vetsi nez 0",
       "invalid_timeout": "Timeout musi byt vetsi nez 0",
       "invalid_throttle_ms": "Pauza mezi dotazy musi byt 0 nebo vyssi",
-      "invalid_retries": "Pocet opakovani musi byt 0 nebo vyssi"
+      "invalid_retries": "Pocet opakovani musi byt 0 nebo vyssi",
+      "invalid_profile": "Neplatny typ tepelka"
     }
   }
 }

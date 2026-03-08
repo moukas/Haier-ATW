@@ -7,6 +7,7 @@
           "name": "Heat pump name",
           "host": "Host",
           "transport": "Transport",
+          "profile": "Heat pump type",
           "port": "Port",
           "slave_id": "Slave ID",
           "scan_interval": "Scan interval (s)",
@@ -24,7 +25,8 @@
       "invalid_scan_interval": "Scan interval must be greater than 0",
       "invalid_timeout": "Timeout must be greater than 0",
       "invalid_throttle_ms": "Inter-request delay must be 0 or greater",
-      "invalid_retries": "Retries must be 0 or greater"
+      "invalid_retries": "Retries must be 0 or greater",
+      "invalid_profile": "Invalid heat pump type"
     }
   }
 }

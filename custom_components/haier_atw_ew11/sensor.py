@@ -126,7 +126,13 @@ class HaierAtwRegisterSensor(HaierAtwEntity, SensorEntity):
             }
 
         # Provide helpful attributes for fault registers.
-        if self._reg in (40204, 40205):
+        is_fault_register = False
+        if hasattr(self.coordinator, "is_fault_register"):
+            is_fault_register = bool(self.coordinator.is_fault_register(self._reg))
+        else:
+            is_fault_register = self._reg in (40204, 40205)
+
+        if is_fault_register:
             if raw is None:
                 return attrs
             attrs["raw"] = raw
