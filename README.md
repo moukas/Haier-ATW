@@ -46,9 +46,20 @@ Important addressing note:
 - Configurable timeout, retries, and throttle between requests
 
 ## Install (HACS)
-1. Add this repository as a custom repository (Integration).
-2. Install and restart Home Assistant.
-3. Add integration: Settings -> Devices & Services -> Add Integration -> Haier ATW (EW11 Modbus).
+[![Open your Home Assistant instance and add this repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=moukas&repository=Haier-ATW&category=integration)
+
+1. Open HACS -> Integrations.
+2. Open menu (`⋮`) -> Custom repositories.
+3. Add repository URL `https://github.com/moukas/Haier-ATW` with category `Integration`.
+4. Search `Haier ATW (EW11 Modbus)` in HACS and install.
+5. Restart Home Assistant.
+6. Add integration: Settings -> Devices & Services -> Add Integration -> Haier ATW (EW11 Modbus).
+
+Notes for maintainers:
+- HACS metadata is in [hacs.json](hacs.json).
+- Home Assistant integration metadata is in [manifest.json](custom_components/haier_atw_ew11/manifest.json).
+- Release notes are in [CHANGELOG.md](CHANGELOG.md).
+- HACS validation CI is in `.github/workflows/validate-hacs.yml`.
 
 ## Home Assistant integration icon (Brands)
 - The icon shown next to integration name in Home Assistant UI is loaded from Home Assistant Brands for domain `haier_atw_ew11`.
