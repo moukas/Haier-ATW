@@ -1,5 +1,4 @@
 {
   "name": "Haier ATW (EW11 Modbus)",
-  "homeassistant": "2026.1.0",
-  "render_readme": true
+  "homeassistant": "2026.1.0"
 }
