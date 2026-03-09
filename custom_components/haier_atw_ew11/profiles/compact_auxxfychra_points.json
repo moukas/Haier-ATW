@@ -1,0 +1,182 @@
+[
+  {
+    "group": "Query parameter",
+    "register": 1,
+    "ha_address": 1,
+    "function": "Controller version",
+    "description": "Sent value = actual value * 10",
+    "rw": "R",
+    "range": "",
+    "scale": 0.1,
+    "dtype": "uint16"
+  },
+  {
+    "group": "Query parameter",
+    "register": 2,
+    "ha_address": 2,
+    "function": "Operating hours",
+    "description": "Minutes since restart",
+    "rw": "R",
+    "range": "",
+    "scale": 1.0,
+    "dtype": "uint16"
+  },
+  {
+    "group": "Control parameter",
+    "register": 4,
+    "ha_address": 4,
+    "function": "On-off state",
+    "description": "0- On 1-Off",
+    "rw": "R/W",
+    "range": ""
+  },
+  {
+    "group": "Control parameter",
+    "register": 5,
+    "ha_address": 5,
+    "function": "Operating mode",
+    "description": "0- Heat 1- Cool",
+    "rw": "R/W",
+    "range": ""
+  },
+  {
+    "group": "Control parameter",
+    "register": 6,
+    "ha_address": 6,
+    "function": "Water temperature setpoint",
+    "description": "Unit 0.1 C, sent value = actual value * 10",
+    "rw": "R/W",
+    "range": "",
+    "scale": 0.1,
+    "unit": "°C",
+    "dtype": "int16"
+  },
+  {
+    "group": "Query parameter",
+    "register": 7,
+    "ha_address": 7,
+    "function": "Water inlet temperature",
+    "description": "Unit 0.1 C",
+    "rw": "R",
+    "range": "",
+    "scale": 0.1,
+    "unit": "°C",
+    "dtype": "int16"
+  },
+  {
+    "group": "Query parameter",
+    "register": 8,
+    "ha_address": 8,
+    "function": "Water outlet temperature",
+    "description": "Unit 0.1 C",
+    "rw": "R",
+    "range": "",
+    "scale": 0.1,
+    "unit": "°C",
+    "dtype": "int16"
+  },
+  {
+    "group": "Query parameter",
+    "register": 9,
+    "ha_address": 9,
+    "function": "Operating current",
+    "description": "Unit 0.1 A",
+    "rw": "R",
+    "range": "",
+    "scale": 0.1,
+    "unit": "A",
+    "dtype": "uint16"
+  },
+  {
+    "group": "Query parameter",
+    "register": 10,
+    "ha_address": 10,
+    "function": "Outdoor air temperature",
+    "description": "Unit 0.1 C",
+    "rw": "R",
+    "range": "",
+    "scale": 0.1,
+    "unit": "°C",
+    "dtype": "int16"
+  },
+  {
+    "group": "Fault parameter",
+    "register": 12,
+    "ha_address": 12,
+    "function": "Current fault code",
+    "description": "0 means no fault",
+    "rw": "R",
+    "range": "",
+    "scale": 1.0,
+    "dtype": "uint16"
+  },
+  {
+    "group": "Fault parameter",
+    "register": 13,
+    "ha_address": 13,
+    "function": "History fault code 1",
+    "description": "Historical fault code",
+    "rw": "R",
+    "range": "",
+    "scale": 1.0,
+    "dtype": "uint16"
+  },
+  {
+    "group": "Fault parameter",
+    "register": 14,
+    "ha_address": 14,
+    "function": "History fault code 2",
+    "description": "Historical fault code",
+    "rw": "R",
+    "range": "",
+    "scale": 1.0,
+    "dtype": "uint16"
+  },
+  {
+    "group": "Query parameter",
+    "register": 15,
+    "ha_address": 15,
+    "function": "High pressure value",
+    "description": "Unit 0.01 kg, sent value = actual value * 100",
+    "rw": "R",
+    "range": "",
+    "scale": 0.01,
+    "unit": "kg",
+    "dtype": "uint16"
+  },
+  {
+    "group": "Query parameter",
+    "register": 16,
+    "ha_address": 16,
+    "function": "Low pressure value",
+    "description": "Unit 0.01 kg, sent value = actual value * 100",
+    "rw": "R",
+    "range": "",
+    "scale": 0.01,
+    "unit": "kg",
+    "dtype": "uint16"
+  },
+  {
+    "group": "Query parameter",
+    "register": 17,
+    "ha_address": 17,
+    "function": "Compressor frequency",
+    "description": "Unit 0.1 Hz, sent value = actual value * 10",
+    "rw": "R",
+    "range": "",
+    "scale": 0.1,
+    "unit": "Hz",
+    "dtype": "uint16"
+  },
+  {
+    "group": "Query parameter",
+    "register": 18,
+    "ha_address": 18,
+    "function": "Controlled indoor units count",
+    "description": "0-64",
+    "rw": "R",
+    "range": "",
+    "scale": 1.0,
+    "dtype": "uint16"
+  }
+]

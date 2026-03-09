@@ -11,12 +11,14 @@ from custom_components.haier_atw_ew11.const import (
     CONF_NAME,
     CONF_HOST,
     CONF_PORT,
+    CONF_PROFILE,
     CONF_RETRIES,
     CONF_SCAN_INTERVAL,
     CONF_SLAVE_ID,
     CONF_THROTTLE_MS,
     CONF_TIMEOUT,
     CONF_TRANSPORT,
+    DEFAULT_PROFILE,
 )
 
 
@@ -122,6 +124,7 @@ async def test_config_flow_creates_entry_with_trimmed_host(monkeypatch: pytest.M
     assert result["data"][CONF_NAME] == "Tepelko Dum"
     assert result["data"][CONF_HOST] == "192.168.1.10"
     assert result["data"][CONF_TRANSPORT] == "rtu_over_tcp"
+    assert result["data"][CONF_PROFILE] == DEFAULT_PROFILE
     assert result["data"][CONF_PORT] == DEFAULT_RTU_OVER_TCP_PORT
     assert result["data"][CONF_TIMEOUT] == 2.5
     assert result["data"][CONF_THROTTLE_MS] == 10
@@ -154,3 +157,30 @@ async def test_config_flow_import_sets_default_name_when_missing(monkeypatch: py
     assert result["type"] == "create_entry"
     assert result["title"] == DEFAULT_NAME
     assert result["data"][CONF_NAME] == DEFAULT_NAME
+    assert result["data"][CONF_PROFILE] == DEFAULT_PROFILE
+
+
+@pytest.mark.asyncio
+async def test_config_flow_accepts_explicit_profile_choice(monkeypatch: pytest.MonkeyPatch) -> None:
+    flow = HaierAtwConfigFlow()
+    set_unique_id = AsyncMock()
+    monkeypatch.setattr(flow, "async_set_unique_id", set_unique_id)
+    monkeypatch.setattr(flow, "_abort_if_unique_id_configured", lambda: None)
+
+    result = await flow.async_step_user(
+        {
+            CONF_NAME: "Compact",
+            CONF_HOST: "192.168.1.20",
+            CONF_PORT: 502,
+            CONF_SLAVE_ID: 1,
+            CONF_SCAN_INTERVAL: 10,
+            CONF_TIMEOUT: 2.5,
+            CONF_THROTTLE_MS: 10,
+            CONF_RETRIES: 2,
+            CONF_TRANSPORT: "modbus_tcp",
+            CONF_PROFILE: "haier_compact_auxxfychra",
+        }
+    )
+
+    assert result["type"] == "create_entry"
+    assert result["data"][CONF_PROFILE] == "haier_compact_auxxfychra"

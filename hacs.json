@@ -1,8 +1,4 @@
 {
   "name": "Haier ATW (EW11 Modbus)",
-  "domains": [
-    "haier_atw_ew11"
-  ],
-  "homeassistant": "2026.1.0",
-  "render_readme": true
+  "homeassistant": "2026.1.0"
 }

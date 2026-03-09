@@ -13,6 +13,7 @@ from .const import (
     CONF_NAME,
     CONF_HOST,
     CONF_PORT,
+    CONF_PROFILE,
     CONF_RETRIES,
     CONF_SCAN_INTERVAL,
     CONF_SLAVE_ID,
@@ -21,6 +22,7 @@ from .const import (
     CONF_TRANSPORT,
     DEFAULT_NAME,
     DEFAULT_PORT,
+    DEFAULT_PROFILE,
     DEFAULT_RETRIES,
     TRANSPORT_LEGACY_EW11_RTU_OVER_TCP,
     DEFAULT_SCAN_INTERVAL,
@@ -32,6 +34,7 @@ from .const import (
     TRANSPORTS,
 )
 from .coordinator import HaierAtwCoordinator
+from .profiles import list_profile_options
 
 PLATFORMS: list[str] = ["sensor", "switch", "number", "select", "climate"]
 
@@ -43,6 +46,7 @@ _YAML_ENTRY_SCHEMA = vol.Schema(
         vol.Optional(CONF_TRANSPORT, default=TRANSPORT_MODBUS_TCP): vol.In(
             TRANSPORTS + [TRANSPORT_LEGACY_EW11_RTU_OVER_TCP]
         ),
+        vol.Optional(CONF_PROFILE, default=DEFAULT_PROFILE): vol.In(list_profile_options()),
         vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.positive_int,
         vol.Optional(CONF_SLAVE_ID, default=DEFAULT_SLAVE_ID): cv.positive_int,
         vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.positive_int,

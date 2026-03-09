@@ -24,3 +24,8 @@ def test_use_absolute_addressing_only_for_modbus_tcp_on_8899() -> None:
     assert _use_absolute_addressing("modbus_tcp", 8899) is True
     assert _use_absolute_addressing("modbus_tcp", 502) is False
     assert _use_absolute_addressing("rtu_over_tcp", 8899) is False
+
+
+def test_use_absolute_addressing_respects_profile_ports() -> None:
+    assert _use_absolute_addressing("modbus_tcp", 502, {502}) is True
+    assert _use_absolute_addressing("modbus_tcp", 8899, {502}) is False

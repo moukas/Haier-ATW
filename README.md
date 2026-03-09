@@ -5,7 +5,11 @@
 Custom Home Assistant integration (HACS) for Haier ATW heat pumps connected over RS-485 Modbus via EW11/TCP bridges.
 
 ## Compatibility
-- Heat pump family: Haier ATW units exposing the vendor Modbus register map included in `custom_components/haier_atw_ew11/points.json`.
+- Heat pump family: Haier units with profile-based register maps.
+- Built-in profiles:
+  - `haier_atw_ew11` (existing EW11 map in `custom_components/haier_atw_ew11/points.json`)
+  - `haier_compact_auxxfychra` (compact AUxxFYCHRA(HW) map)
+- Profile definitions are loaded from `custom_components/haier_atw_ew11/profiles/*.profile.json`.
 - Physical board connector: `CN3` (`Modbus A3`, `Modbus B3`) on the indoor/control board.
 - Home Assistant: see `hacs.json` / `manifest.json` minimum versions.
 
@@ -32,6 +36,7 @@ Important addressing note:
 
 ## Features
 - Transport selection: `modbus_tcp` or `rtu_over_tcp`
+- Heat pump profile selection (`profile`)
 - Switches: Power, ECO, Fast DHW
 - Select: Mode
 - Numbers: ZONE1/ZONE2/DHW/Pool/Sterilization setpoints
@@ -41,9 +46,20 @@ Important addressing note:
 - Configurable timeout, retries, and throttle between requests
 
 ## Install (HACS)
-1. Add this repository as a custom repository (Integration).
-2. Install and restart Home Assistant.
-3. Add integration: Settings -> Devices & Services -> Add Integration -> Haier ATW (EW11 Modbus).
+[![Open your Home Assistant instance and add this repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=moukas&repository=Haier-ATW&category=integration)
+
+1. Open HACS -> Integrations.
+2. Open menu (`⋮`) -> Custom repositories.
+3. Add repository URL `https://github.com/moukas/Haier-ATW` with category `Integration`.
+4. Search `Haier ATW (EW11 Modbus)` in HACS and install.
+5. Restart Home Assistant.
+6. Add integration: Settings -> Devices & Services -> Add Integration -> Haier ATW (EW11 Modbus).
+
+Notes for maintainers:
+- HACS metadata is in [hacs.json](hacs.json).
+- Home Assistant integration metadata is in [manifest.json](custom_components/haier_atw_ew11/manifest.json).
+- Release notes are in [CHANGELOG.md](CHANGELOG.md).
+- HACS validation CI is in `.github/workflows/validate-hacs.yml`.
 
 ## Home Assistant integration icon (Brands)
 - The icon shown next to integration name in Home Assistant UI is loaded from Home Assistant Brands for domain `haier_atw_ew11`.
@@ -80,6 +96,7 @@ haier_atw_ew11:
     throttle_ms: 60
     retries: 2
     scan_interval: 10
+    profile: haier_atw_ew11
 ```
 
 ## Mock EW11 server (for local testing)
@@ -107,6 +124,8 @@ Notes:
 ## Notes
 - Uses transport-specific address mapping internally.
 - Existing Haier register mapping is kept (e.g., `40001`, `401xx`).
+- Existing installations keep full backward compatibility by defaulting to `profile=haier_atw_ew11`.
+- Adding a new heat pump type is done by adding a new `*.profile.json` file (and matching points file).
 - Point table extracted from vendor document.
 - Read sensors expose decoded value labels in attributes, including Czech variants (`value_label_cs`, `value_options_cs`) when enum-like values are available.
 - For unstable EW11 links, start with: `transport=rtu_over_tcp`, `port=8899`, `timeout=4-5`, `retries=3`, `throttle_ms=120-200`, `scan_interval=15-30`.
